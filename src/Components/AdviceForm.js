@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 
 
 function AdviceForm(){
@@ -6,7 +6,7 @@ function AdviceForm(){
     const [randomAdvice, setRandomAdvice] = useState('')
     const [query, setSearchQuery] = useState('')
 
-    
+    const queryInput = useRef()
 
     const randomSubmit = () => {
             fetch("https://api.adviceslip.com/advice")
@@ -23,14 +23,20 @@ function AdviceForm(){
             })
     }
 
-    const searchSubmit = (event) => {
-            event.preventDefault()
+    const searchSubmit = () => {
+
+        const query = queryInput.current.value 
+        if (query !== ''){
+            setSearchQuery(query)
+        }
+
             fetch(`https://api.adviceslip.com/advice/search/${query}`)
             .then((response) => {
-                console.log(response.json()) 
+                return response.json()
             })
-            .then(slips => {
-                setSearchQuery(slips.advice)
+            .then((completedData) => {
+                console.log(completedData)
+                setSearchQuery(completedData.slips[0].advice)
             })
             .catch(err => {
                 console.error(err)
@@ -47,14 +53,14 @@ function AdviceForm(){
             </div>
             <div>
                 <h3>Type a Word Below to Search for Advice</h3>
-                <form onSubmit={searchSubmit}>
-                    <input 
+                <div>
+                    <input
+                        ref={queryInput} 
                         required
                         type="text"
-                        defaultValue={query}
                     /> &nbsp;
-                    <button type="submit">Results</button>
-                </form>
+                    <button  onClick={searchSubmit} type="submit">Results</button>
+                </div>
                 <p>{query}</p>
                 
             </div>
@@ -63,3 +69,5 @@ function AdviceForm(){
     )
 }
 export default AdviceForm;
+
+//need to add ternary operator for when a search query does not exist
